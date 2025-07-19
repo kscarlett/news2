@@ -4,7 +4,7 @@ A Go package for calculating National Early Warning Score 2 (NEWS2) based on pat
 
 ## Features
 
-- Calculate NEWS2 scores from respiratory rate, oxygen saturation, systolic blood pressure, pulse, temperature, consciousness level, and oxygen supplementation.
+Calculates NEWS2 scores from respiratory rate, oxygen saturation, systolic blood pressure, pulse, temperature, consciousness level, and oxygen supplementation.
 
 > NOTE: This was not designed for use in any systems where any reliability or safe operation is needed. This package is used as part of my workflow to create and manage simulation cases. I cannot provide any guarantee of the stability, reliability or accuracy of this code.
 
