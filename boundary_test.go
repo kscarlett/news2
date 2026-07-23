@@ -45,7 +45,7 @@ func TestSaturationsScale1Boundaries(t *testing.T) {
 	for _, tt := range tests {
 		// Scale 1 saturation scoring is independent of supplemental oxygen.
 		for _, onOxygen := range []bool{false, true} {
-			if got := calculateSaturationsScore(tt.oxygenSat, onOxygen, true); got != tt.expected {
+			if got := calculateSaturationsScore(tt.oxygenSat, onOxygen, Scale1); got != tt.expected {
 				t.Errorf("calculateSaturationsScore(%d, %t, scale1) = %d, want %d", tt.oxygenSat, onOxygen, got, tt.expected)
 			}
 		}
@@ -69,7 +69,7 @@ func TestSaturationsScale2OnAirBoundaries(t *testing.T) {
 		{100, 0},
 	}
 	for _, tt := range tests {
-		if got := calculateSaturationsScore(tt.oxygenSat, false, false); got != tt.expected {
+		if got := calculateSaturationsScore(tt.oxygenSat, false, Scale2); got != tt.expected {
 			t.Errorf("calculateSaturationsScore(%d, on air, scale2) = %d, want %d", tt.oxygenSat, got, tt.expected)
 		}
 	}
@@ -96,7 +96,7 @@ func TestSaturationsScale2OnOxygenBoundaries(t *testing.T) {
 		{100, 3},
 	}
 	for _, tt := range tests {
-		if got := calculateSaturationsScore(tt.oxygenSat, true, false); got != tt.expected {
+		if got := calculateSaturationsScore(tt.oxygenSat, true, Scale2); got != tt.expected {
 			t.Errorf("calculateSaturationsScore(%d, on oxygen, scale2) = %d, want %d", tt.oxygenSat, got, tt.expected)
 		}
 	}
@@ -146,6 +146,24 @@ func TestPulseBoundaries(t *testing.T) {
 	for _, tt := range tests {
 		if got := calculatePulseScore(tt.pulse); got != tt.expected {
 			t.Errorf("calculatePulseScore(%d) = %d, want %d", tt.pulse, got, tt.expected)
+		}
+	}
+}
+
+func TestConsciousnessScore(t *testing.T) {
+	tests := []struct {
+		level    ConsciousnessLevel
+		expected int
+	}{
+		{Alert, 0},
+		{Confused, 3},
+		{Voice, 3},
+		{Pain, 3},
+		{Unresponsive, 3},
+	}
+	for _, tt := range tests {
+		if got := calculateConsciousnessScore(tt.level); got != tt.expected {
+			t.Errorf("calculateConsciousnessScore(%s) = %d, want %d", tt.level, got, tt.expected)
 		}
 	}
 }
