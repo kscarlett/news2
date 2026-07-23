@@ -1,12 +1,17 @@
 # NEWS2
 
-A Go package for calculating National Early Warning Score 2 (NEWS2) based on patient vital signs.
+[![CI](https://github.com/kscarlett/news2/actions/workflows/ci.yml/badge.svg)](https://github.com/kscarlett/news2/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kscarlett/news2.svg)](https://pkg.go.dev/github.com/kscarlett/news2)
 
-## Features
+A Go package for calculating the National Early Warning Score 2 (NEWS2) from patient vital signs, including the per-parameter breakdown and the clinical risk category used to drive escalation.
 
-Calculates NEWS2 scores from respiratory rate, oxygen saturation, systolic blood pressure, pulse, temperature, consciousness level, and oxygen supplementation.
+> **NOTE:** This package is not a medical device and was not designed for use in any system where reliability or safe operation is needed. It is used as part of my workflow to create and manage simulation cases. I cannot provide any guarantee of the stability, reliability or accuracy of this code.
 
-> NOTE: This was not designed for use in any systems where any reliability or safe operation is needed. This package is used as part of my workflow to create and manage simulation cases. I cannot provide any guarantee of the stability, reliability or accuracy of this code.
+## Install
+
+```sh
+go get github.com/kscarlett/news2
+```
 
 ## Usage
 
@@ -14,21 +19,74 @@ Calculates NEWS2 scores from respiratory rate, oxygen saturation, systolic blood
 import "github.com/kscarlett/news2"
 
 vitals := news2.VitalSigns{
-    RespRate:           18,
-    OxygenSat:          95,
-    SystolicBP:         120,
-    Pulse:              80,
-    Temp:               36.8,
-    ConsciousnessLevel: news2.Alert,
-    OnOxygen:           false,
+    RespRate:           22,          // breaths per minute
+    OxygenSat:          93,          // SpO2 %
+    SystolicBP:         98,          // mmHg
+    Pulse:              112,         // beats per minute
+    Temp:               38.4,        // °C
+    ConsciousnessLevel: news2.Alert, // ACVPU
+    OnOxygen:           false,       // receiving supplemental oxygen
+    // SpO2Scale defaults to news2.Scale1, which is correct for most
+    // patients. Only set news2.Scale2 for patients with confirmed
+    // hypercapnic respiratory failure (target sats 88–92%), as
+    // prescribed by a competent clinical decision maker.
 }
 
-score := news2.CalculateScore(vitals, true) // true for Scale 1, false for Scale 2
+result, err := news2.Calculate(vitals)
+if err != nil {
+    // Inputs are minimally validated: values that can't be meaningfully
+    // scored (the zero value of VitalSigns, negative readings, an SpO2
+    // above 100%) return an error wrapping news2.ErrInvalidVitalSigns
+    // instead of a misleading score. Enforcing plausible clinical ranges
+    // is left to the calling software.
+    log.Fatal(err)
+}
+
+fmt.Println(result.Total)   // 9
+fmt.Println(result.Risk)    // High
+fmt.Println(result.RedFlag) // false — no single parameter scored 3
+fmt.Println(result.Pulse)   // 2 — each parameter's subscore is available
 ```
+
+If you only need the aggregate number:
+
+```go
+score, err := news2.CalculateScore(vitals)
+```
+
+## Interpreting the score
+
+NEWS2 is a trigger system: the aggregate score (and a "red score" of 3 in any single parameter) maps to a clinical risk category, a minimum observation frequency, and an escalation response. `Result.Risk` and `Result.RedFlag` encode this mapping:
+
+| Trigger | `Result.Risk` | Response (per RCP guidance) |
+| --- | --- | --- |
+| Score 0 | Low | Routine monitoring (minimum 12-hourly) |
+| Score 1–4 | Low | 4–6 hourly observations; registered nurse decides on escalation |
+| Score of 3 in any single parameter | Low-Medium | Urgent ward-based review; minimum hourly observations |
+| Score 5–6 | Medium | Urgent review by clinician competent in acute illness; minimum hourly observations |
+| Score ≥ 7 | High | Emergency response, usually with critical care involvement; continuous monitoring |
+
+A score of 5 or more is also a common threshold to screen for sepsis.
+
+`Result.Response()` (or `news2.ResponseFor(risk)`) returns a summary of the RCP-recommended monitoring frequency and clinical response for the risk category:
+
+```go
+resp := result.Response()
+fmt.Println(resp.MonitoringFrequency) // e.g. "minimum 1 hourly"
+fmt.Println(resp.ClinicalResponse)    // escalation guidance
+```
+
+> This response text is a plain-language summary of the RCP "Clinical response to the NEWS2 trigger thresholds" chart, provided for reference only. It is not a substitute for the RCP guidance or your local escalation policy, which always takes precedence.
+
+## Scope
+
+- NEWS2 applies to adults aged 16 and over. It is not validated for children or for use in pregnancy.
+- `Confused` on the ACVPU scale means **new-onset** confusion (or worse than baseline). Patients with chronic baseline confusion are recorded as `Alert`.
+- SpO2 `Scale2` is only for patients with confirmed hypercapnic respiratory failure; the decision to use it is clinical and should be recorded in the patient's notes.
 
 ## Reference
 
-This package implements the NEWS2 scoring system as described by the Royal College of Physicians (2017).  
+This package implements the NEWS2 scoring system as described by the Royal College of Physicians (2017; the December 2022 update left the scoring unchanged).
 **Source:** Royal College of Physicians. _National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS._ London: RCP, 2017.
 
 ## License
