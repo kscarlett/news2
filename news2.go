@@ -77,7 +77,7 @@ func calculateRespiratoryRateScore(respRate int) int {
 	} else if respRate <= 20 {
 		return 0
 	} else if respRate <= 24 {
-		return 1
+		return 2
 	} else {
 		return 3
 	}
@@ -112,7 +112,7 @@ func calculateSaturationsScore(oxygenSat int, onOxygen, scale1 bool) int {
 				return 3
 			}
 		}
-		if oxygenSat >= 93 {
+		if oxygenSat >= 88 {
 			return 0
 		} else if oxygenSat >= 86 {
 			return 1
