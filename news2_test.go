@@ -219,12 +219,16 @@ func TestValidation(t *testing.T) {
 		{"zero value struct", func(v *VitalSigns) { *v = VitalSigns{} }},
 		{"resp rate unset", func(v *VitalSigns) { v.RespRate = 0 }},
 		{"resp rate negative", func(v *VitalSigns) { v.RespRate = -1 }},
+		{"resp rate beyond sane bound", func(v *VitalSigns) { v.RespRate = 101 }},
 		{"oxygen sat unset", func(v *VitalSigns) { v.OxygenSat = 0 }},
 		{"oxygen sat above 100", func(v *VitalSigns) { v.OxygenSat = 101 }},
 		{"systolic BP unset", func(v *VitalSigns) { v.SystolicBP = 0 }},
+		{"systolic BP beyond sane bound", func(v *VitalSigns) { v.SystolicBP = 301 }},
 		{"pulse unset", func(v *VitalSigns) { v.Pulse = 0 }},
+		{"pulse beyond sane bound", func(v *VitalSigns) { v.Pulse = 301 }},
 		{"temperature unset", func(v *VitalSigns) { v.Temp = 0 }},
 		{"temperature negative", func(v *VitalSigns) { v.Temp = -1.5 }},
+		{"temperature beyond sane bound", func(v *VitalSigns) { v.Temp = 60.1 }},
 		{"unknown consciousness level", func(v *VitalSigns) { v.ConsciousnessLevel = ConsciousnessLevel(99) }},
 		{"negative consciousness level", func(v *VitalSigns) { v.ConsciousnessLevel = ConsciousnessLevel(-1) }},
 		{"unknown SpO2 scale", func(v *VitalSigns) { v.SpO2Scale = SpO2Scale(3) }},
@@ -259,10 +263,10 @@ func TestValidationAcceptsImplausibleValues(t *testing.T) {
 		name   string
 		modify func(*VitalSigns)
 	}{
-		{"very high resp rate", func(v *VitalSigns) { v.RespRate = 150 }},
-		{"very high systolic BP", func(v *VitalSigns) { v.SystolicBP = 400 }},
-		{"very high pulse", func(v *VitalSigns) { v.Pulse = 400 }},
-		{"temperature that looks like Fahrenheit", func(v *VitalSigns) { v.Temp = 98.6 }},
+		{"very high resp rate", func(v *VitalSigns) { v.RespRate = 90 }},
+		{"very high systolic BP", func(v *VitalSigns) { v.SystolicBP = 290 }},
+		{"very high pulse", func(v *VitalSigns) { v.Pulse = 290 }},
+		{"very high temperature", func(v *VitalSigns) { v.Temp = 45.0 }},
 		{"very low oxygen sat", func(v *VitalSigns) { v.OxygenSat = 1 }},
 	}
 

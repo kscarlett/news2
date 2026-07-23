@@ -1,6 +1,7 @@
 # NEWS2
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/kscarlett/news2.svg)](https://pkg.go.dev/github.com/kscarlett/news2) · [CI](https://github.com/kscarlett/news2/actions/workflows/ci.yml)
+[![CI](https://github.com/kscarlett/news2/actions/workflows/ci.yml/badge.svg)](https://github.com/kscarlett/news2/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kscarlett/news2.svg)](https://pkg.go.dev/github.com/kscarlett/news2)
 
 A Go package for calculating the National Early Warning Score 2 (NEWS2) from patient vital signs, including the per-parameter breakdown and the clinical risk category used to drive escalation.
 
