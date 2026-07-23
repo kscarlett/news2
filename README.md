@@ -68,6 +68,16 @@ NEWS2 is a trigger system: the aggregate score (and a "red score" of 3 in any si
 
 A score of 5 or more is also a common threshold to screen for sepsis.
 
+`Result.Response()` (or `news2.ResponseFor(risk)`) returns a summary of the RCP-recommended monitoring frequency and clinical response for the risk category:
+
+```go
+resp := result.Response()
+fmt.Println(resp.MonitoringFrequency) // e.g. "minimum 1 hourly"
+fmt.Println(resp.ClinicalResponse)    // escalation guidance
+```
+
+> This response text is a plain-language summary of the RCP "Clinical response to the NEWS2 trigger thresholds" chart, provided for reference only. It is not a substitute for the RCP guidance or your local escalation policy, which always takes precedence.
+
 ## Scope
 
 - NEWS2 applies to adults aged 16 and over. It is not validated for children or for use in pregnancy.

@@ -34,6 +34,31 @@ func ExampleCalculate() {
 	// Red flag: false
 }
 
+func ExampleResult_Response() {
+	vitals := news2.VitalSigns{
+		RespRate:           24,
+		OxygenSat:          92,
+		SystolicBP:         100,
+		Pulse:              115,
+		Temp:               38.5,
+		ConsciousnessLevel: news2.Alert,
+		OnOxygen:           true,
+	}
+
+	result, err := news2.Calculate(vitals)
+	if err != nil {
+		fmt.Println("invalid observations:", err)
+		return
+	}
+
+	response := result.Response()
+	fmt.Println("Risk:", result.Risk)
+	fmt.Println("Monitoring:", response.MonitoringFrequency)
+	// Output:
+	// Risk: High
+	// Monitoring: continuous monitoring of vital signs
+}
+
 func ExampleCalculateScore() {
 	vitals := news2.VitalSigns{
 		RespRate:           18,
