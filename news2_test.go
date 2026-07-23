@@ -217,16 +217,14 @@ func TestValidation(t *testing.T) {
 		modify func(*VitalSigns)
 	}{
 		{"zero value struct", func(v *VitalSigns) { *v = VitalSigns{} }},
-		{"resp rate too low", func(v *VitalSigns) { v.RespRate = 0 }},
-		{"resp rate too high", func(v *VitalSigns) { v.RespRate = 101 }},
-		{"oxygen sat too low", func(v *VitalSigns) { v.OxygenSat = 0 }},
+		{"resp rate unset", func(v *VitalSigns) { v.RespRate = 0 }},
+		{"resp rate negative", func(v *VitalSigns) { v.RespRate = -1 }},
+		{"oxygen sat unset", func(v *VitalSigns) { v.OxygenSat = 0 }},
 		{"oxygen sat above 100", func(v *VitalSigns) { v.OxygenSat = 101 }},
-		{"systolic BP too low", func(v *VitalSigns) { v.SystolicBP = 0 }},
-		{"systolic BP too high", func(v *VitalSigns) { v.SystolicBP = 400 }},
-		{"pulse too low", func(v *VitalSigns) { v.Pulse = 0 }},
-		{"pulse too high", func(v *VitalSigns) { v.Pulse = 400 }},
-		{"temperature too low", func(v *VitalSigns) { v.Temp = 0 }},
-		{"temperature in Fahrenheit", func(v *VitalSigns) { v.Temp = 98.6 }},
+		{"systolic BP unset", func(v *VitalSigns) { v.SystolicBP = 0 }},
+		{"pulse unset", func(v *VitalSigns) { v.Pulse = 0 }},
+		{"temperature unset", func(v *VitalSigns) { v.Temp = 0 }},
+		{"temperature negative", func(v *VitalSigns) { v.Temp = -1.5 }},
 		{"unknown consciousness level", func(v *VitalSigns) { v.ConsciousnessLevel = ConsciousnessLevel(99) }},
 		{"negative consciousness level", func(v *VitalSigns) { v.ConsciousnessLevel = ConsciousnessLevel(-1) }},
 		{"unknown SpO2 scale", func(v *VitalSigns) { v.SpO2Scale = SpO2Scale(3) }},
@@ -250,6 +248,32 @@ func TestValidation(t *testing.T) {
 func TestValidVitalsPassValidation(t *testing.T) {
 	if err := normalVitals().Validate(); err != nil {
 		t.Errorf("Validate() = %v, want nil", err)
+	}
+}
+
+// Validation is deliberately minimal: clinically implausible but
+// mechanically scoreable values are accepted, since range enforcement is
+// the calling software's responsibility.
+func TestValidationAcceptsImplausibleValues(t *testing.T) {
+	tests := []struct {
+		name   string
+		modify func(*VitalSigns)
+	}{
+		{"very high resp rate", func(v *VitalSigns) { v.RespRate = 150 }},
+		{"very high systolic BP", func(v *VitalSigns) { v.SystolicBP = 400 }},
+		{"very high pulse", func(v *VitalSigns) { v.Pulse = 400 }},
+		{"temperature that looks like Fahrenheit", func(v *VitalSigns) { v.Temp = 98.6 }},
+		{"very low oxygen sat", func(v *VitalSigns) { v.OxygenSat = 1 }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			vitals := normalVitals()
+			tt.modify(&vitals)
+			if err := vitals.Validate(); err != nil {
+				t.Errorf("Validate() = %v, want nil", err)
+			}
+		})
 	}
 }
 

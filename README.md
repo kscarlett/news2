@@ -1,7 +1,6 @@
 # NEWS2
 
-[![CI](https://github.com/kscarlett/news2/actions/workflows/ci.yml/badge.svg)](https://github.com/kscarlett/news2/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/kscarlett/news2.svg)](https://pkg.go.dev/github.com/kscarlett/news2)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kscarlett/news2.svg)](https://pkg.go.dev/github.com/kscarlett/news2) · [CI](https://github.com/kscarlett/news2/actions/workflows/ci.yml)
 
 A Go package for calculating the National Early Warning Score 2 (NEWS2) from patient vital signs, including the per-parameter breakdown and the clinical risk category used to drive escalation.
 
@@ -34,9 +33,11 @@ vitals := news2.VitalSigns{
 
 result, err := news2.Calculate(vitals)
 if err != nil {
-    // Inputs are validated: physiologically implausible values (including
-    // the zero value of VitalSigns) return an error wrapping
-    // news2.ErrInvalidVitalSigns instead of a misleading score.
+    // Inputs are minimally validated: values that can't be meaningfully
+    // scored (the zero value of VitalSigns, negative readings, an SpO2
+    // above 100%) return an error wrapping news2.ErrInvalidVitalSigns
+    // instead of a misleading score. Enforcing plausible clinical ranges
+    // is left to the calling software.
     log.Fatal(err)
 }
 

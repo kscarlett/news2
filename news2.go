@@ -72,8 +72,9 @@ func (s SpO2Scale) String() string {
 
 // VitalSigns holds one complete set of patient observations for NEWS2
 // scoring. All fields must be populated; Calculate and CalculateScore
-// validate them and return an error for physiologically implausible values,
-// which also guards against accidentally scoring an incomplete struct.
+// validate them and return an error for values that cannot be meaningfully
+// scored, which also guards against accidentally scoring an incomplete
+// struct. See Validate for what is checked.
 type VitalSigns struct {
 	// RespRate is the respiration rate in breaths per minute.
 	RespRate int
